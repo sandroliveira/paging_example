@@ -67,8 +67,8 @@ class ArticleActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 articleAdapter.loadStateFlow.collect {
-                    binding.prependProgress.isVisible = it.source.prepend is Loading
-                    binding.appendProgress.isVisible = it.source.append is Loading
+                    binding.prependProgress.isVisible = false //it.source.prepend is Loading
+                    binding.appendProgress.isVisible = false //it.source.append is Loading
                 }
             }
         }
@@ -79,7 +79,12 @@ class ArticleActivity : AppCompatActivity() {
  * Sets up the [RecyclerView] and binds [ArticleAdapter] to it
  */
 private fun ActivityArticlesBinding.bindAdapter(articleAdapter: ArticleAdapter) {
-    list.adapter = articleAdapter
+    val header = ArticleLoadStateAdapter {articleAdapter.retry()}
+
+    list.adapter = articleAdapter.withLoadStateHeaderAndFooter(
+        header ,
+        ArticleLoadStateAdapter {articleAdapter.retry()}
+    )
     list.layoutManager = LinearLayoutManager(list.context)
     val decoration = DividerItemDecoration(list.context, DividerItemDecoration.VERTICAL)
     list.addItemDecoration(decoration)
